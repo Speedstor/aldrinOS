@@ -2,8 +2,6 @@
 
 ![](ponchoOS_summary.png)  
 
-### Backup
-
 ### Structure
 |folder|sub-folder|what's inside|
 |---    |---    |---|
