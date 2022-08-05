@@ -1,6 +1,6 @@
-#include "kernelUtil.h"
-#include "memory/heap.h"
-#include "scheduling/pit/pit.h"
+#include "sys/boot/kernelUtil.h"
+#include "sys/memory/heap.h"
+#include "sys/time/pit.h"
 
 uint8_t testbuffer[20];
 extern "C" void _start(BootInfo* bootInfo) {

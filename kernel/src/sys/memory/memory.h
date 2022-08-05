@@ -1,0 +1,10 @@
+#ifndef MEMORY_H
+#define MEMORY_H
+
+#include <stdint.h>
+#include "../boot/efiMemory.h"
+
+uint64_t GetMemorySize(EFI_MEMORY_DESCRIPTOR* mMap, uint64_t mMapEntries, uint64_t mMapDescSize);
+void memset(void* start, uint8_t value, uint64_t num);
+
+#endif

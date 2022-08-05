@@ -1,0 +1,30 @@
+#ifndef INTERRUPTS_H
+#define INTERRUPTS_H
+
+#include "../../graphics/BasicRenderer.h"
+#include "../../userinput/mouse.h"
+
+#define PIC1_COMMAND 0x20
+#define PIC1_DATA 0x21
+#define PIC2_COMMAND 0xA0
+#define PIC2_DATA 0xA1
+#define PIC_EOI 0x20
+
+#define ICW1_INIT 0x10
+#define ICW1_TCW4 0x01
+#define ICW4_8086 0x01
+
+struct interrupt_frame;
+__attribute__((interrupt)) void PageFault_handler(struct interrupt_frame* frame);
+__attribute__((interrupt)) void DoubleFault_handler(struct interrupt_frame* frame);
+__attribute__((interrupt)) void GPFault_handler(struct interrupt_frame* frame);     // General Protection Fault
+__attribute__((interrupt)) void KeyboardInt_handler(struct interrupt_frame* frame);
+__attribute__((interrupt)) void MouseInt_handler(struct interrupt_frame* frame);
+__attribute__((interrupt)) void PITInt_handler(struct interrupt_frame* frame);
+
+
+void RemapPIC();
+void PIC_EndMaster();
+void PIC_EndSlave();
+
+#endif

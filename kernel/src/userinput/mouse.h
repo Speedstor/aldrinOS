@@ -1,9 +1,9 @@
 #ifndef MOUSE_H
 #define MOUSE_H
 
-#include "../IO.h"
-#include "../math.h"
-#include "../BasicRenderer.h"
+#include "../sys/devices/IO.h"
+#include "../inc/math.h"
+#include "../graphics/BasicRenderer.h"
 
 #define PS2Leftbutton 0b00000001
 #define PS2Middlebutton 0b00000100
