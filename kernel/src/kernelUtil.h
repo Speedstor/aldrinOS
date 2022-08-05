@@ -3,10 +3,10 @@
 
 #include <stdint.h>
 #include "BasicRenderer.h"
-#include "cstr.h"
+#include "def/cstr.h"
 #include "efiMemory.h"
-#include "memory.h"
-#include "Bitmap.h"
+#include "memory/memory.h"
+#include "def/Bitmap.h"
 #include "./paging/PageFrameAllocator.h"
 #include "./paging/PageMapIndexer.h"
 #include "./paging/paging.h"

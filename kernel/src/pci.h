@@ -5,7 +5,7 @@
 #include "acpi.h"
 #include "paging/PageTableManager.h"
 #include "BasicRenderer.h"
-#include "cstr.h"
+#include "def/cstr.h"
 
 namespace PCI {
     struct PCIDeviceHeader {
