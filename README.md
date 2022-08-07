@@ -16,6 +16,16 @@
         - Prepare interrupts
         - initialize heap (w/ page map)
         - Handle ACPI (devices)
+            - get xsdt from rsdp
+            - use xsdt to get MCFG
+            - use MCFG to get all the devices
+
+#### Brainstorm
+- Implement USB devices (keybaord)
+- PCI -> Serial Bus
+- get access to Serial Bus ids first
+- figure out the outb and inb to interface with it
+
 
 #### bootInfo
 ```{cpp}
@@ -28,6 +38,18 @@ struct bootInfo {
     RSDP, //Root System Descriptor Pointer
 }
 ```
+
+#### Acronyms
+|acronym|stands for|
+|---|---|
+|GDT|Global Descriptor Table|
+|EFI|Extensible Firmware Interface|
+|ACPI|Advanced Configuration and Power Interface|
+|RSDP|Root System Descriptor Pointer|
+|PCI|Peripheral Component Interconnect|
+|IDT|Interrupt Descriptor Table|
+|SDT|Service Descriptor Table|
+|MCFG|Memory Mapped Configuration Space Access (info about PCI configuration space base)|
 
 ### Structure
 |folder|sub-folder|what's inside|
@@ -43,4 +65,9 @@ struct bootInfo {
 |graphics|      |- BasicRenderer<br/>- Framebuffer<br/>- simpleFonts
 |       |       |- kernel.cpp<br/>
 
-
+### TODO
+- LoadGDT asm
+- PCI Serial Bus
+- improve printing to screen
+- improve ClearChar
+- cursorColor & layers

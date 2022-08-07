@@ -1,4 +1,6 @@
 #include "keyboard.h"
+#include "../graphics/Print.h"
+#include "kbScancodeTranslation.h"
 
 
 bool isLeftShiftPressed;
@@ -19,19 +21,19 @@ void HandleKeyboard(uint8_t scancode) {
         isRightShiftPressed = false;
         return;
     case Enter:
-        GlobalRenderer->Next();
+        PRINT::Next();
         return;
     case Space:
-        GlobalRenderer->PutChar(' ');
+        PRINT::PutChar(' ');
         return;
     case BackSpace:
-        GlobalRenderer->ClearChar();
+        PRINT::ClearChar();
         return;
     }
     char ascii = QWERTYKeyboard::Translate(scancode, isLeftShiftPressed | isRightShiftPressed);
 
     if (ascii != 0) {
-        GlobalRenderer->PutChar(ascii);
+        PRINT::PutChar(ascii);
     }
 }
 

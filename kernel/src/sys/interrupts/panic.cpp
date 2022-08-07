@@ -2,19 +2,17 @@
 #include "../../graphics/BasicRenderer.h"
 
 void Panic(const char* panicMessage) {
-    /* GlobalRenderer->ClearColor = 0x0000ff; */
+    /* GlobalRenderer->BackgroundColor = 0x0000ff; */
     /* GlobalRenderer->Clear(); */
 
-    /* GlobalRenderer->CursorPosition = {0, 0}; */
+    /* PrintVars.CursorPosition = {0, 0}; */
 
-    GlobalRenderer->Color = 0x00ffffff;
+    PrintVars.Color = 0x00ffffff;
+    PRINT::Println("Kernel Panic");
 
-    GlobalRenderer->Print("Kernel Panic");
+    PRINT::Next();
 
-    GlobalRenderer->Next();
-    GlobalRenderer->Next();
-
-    GlobalRenderer->Print(panicMessage);
+    PRINT::Println(panicMessage);
 }
 
 

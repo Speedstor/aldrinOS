@@ -13,16 +13,16 @@ namespace PCI {
             if (pciDeviceHeader->DeviceID == 0) return;
             if (pciDeviceHeader->DeviceID == 0xFFFF) return;
 
-            GlobalRenderer->Print(GetVendorName(pciDeviceHeader->VendorID));
-            GlobalRenderer->Print(" / ");
-            GlobalRenderer->Print(GetDeviceName(pciDeviceHeader->VendorID, pciDeviceHeader->DeviceID));
-            GlobalRenderer->Print(" / ");
-			GlobalRenderer->Print(DeviceClasses[pciDeviceHeader->Class]);
-            GlobalRenderer->Print(" / ");
-			GlobalRenderer->Print(GetSubclassName(pciDeviceHeader->Class, pciDeviceHeader->Subclass));
-            GlobalRenderer->Print(" / ");
-			GlobalRenderer->Print(GetProgIFName(pciDeviceHeader->Class, pciDeviceHeader->Subclass, pciDeviceHeader->ProgIF));
-            GlobalRenderer->Next();
+            PRINT::Print(GetVendorName(pciDeviceHeader->VendorID));
+            PRINT::Print(" / ");
+            PRINT::Print(GetDeviceName(pciDeviceHeader->VendorID, pciDeviceHeader->DeviceID));
+            PRINT::Print(" / ");
+			PRINT::Print(DeviceClasses[pciDeviceHeader->Class]);
+            PRINT::Print(" / ");
+			PRINT::Print(GetSubclassName(pciDeviceHeader->Class, pciDeviceHeader->Subclass));
+            PRINT::Print(" / ");
+			PRINT::Print(GetProgIFName(pciDeviceHeader->Class, pciDeviceHeader->Subclass, pciDeviceHeader->ProgIF));
+            PRINT::Next();
 
             switch (pciDeviceHeader->Class) {
                 case 0x01: // mass storage controller
@@ -68,7 +68,6 @@ namespace PCI {
 
         void EnumeratePCI(ACPI::MCFGHeader* mcfg){
             int entries = ((mcfg->Header.Length) - sizeof(ACPI::MCFGHeader)) / sizeof(ACPI::DeviceConfig);
-            GlobalRenderer->Print(to_hstring((uint32_t)entries));
             for (int t = 0; t < entries; t++){
                 ACPI::DeviceConfig* newDeviceConfig = (ACPI::DeviceConfig*)((uint64_t)mcfg + sizeof(ACPI::MCFGHeader) + (sizeof(ACPI::DeviceConfig) * t));
             for (uint64_t bus = newDeviceConfig->StartBus; bus < newDeviceConfig->EndBus; bus++){

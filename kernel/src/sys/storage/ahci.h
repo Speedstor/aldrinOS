@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "../devices/pci.h"
+#include "../../graphics/Print.h"
 
 namespace AHCI {
     #define ATA_DEV_BUSY 0x80

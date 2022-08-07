@@ -2,8 +2,7 @@
 #define KEYBOARD_H
 
 #include <stdint.h>
-#include "kbScancodeTranslation.h"
-#include "../graphics/BasicRenderer.h"
+#include "../graphics/Print.h"
 
 void HandleKeyboard(uint8_t scancode);
 
