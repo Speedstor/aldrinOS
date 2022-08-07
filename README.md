@@ -2,6 +2,35 @@
 
 ![](ponchoOS_summary.png)  
 
+### Notes
+#### Poncho OS (sequential)
+- bootloader -> prepare struct bootInfo
+- kernel
+    - prepareKernel
+        - BasicRenderer
+        - GDT //Global Descriptor Table (sections of memory)
+        - Prepare memory
+            - PageFrameAllocator
+            - Reserve EFI Memory
+            - Lock Kernel Pages
+            - Lock Framebuffer
+            - replace EFI Virtual Memory (Page Map?)
+        - Prepare interrupts
+        - initialize heap (w/ page map)
+        - Handle ACPI (devices)
+
+#### bootInfo
+```{cpp}
+struct bootInfo {
+    framebuffer,
+    psf1-font,
+    EFI_MEMORY_MAP mMap,
+    mMapSize,
+    mMapDescSize,
+    RSDP, //Root System Descriptor Pointer
+}
+```
+
 ### Structure
 |folder|sub-folder|what's inside|
 |---    |---    |---|
