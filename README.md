@@ -1,11 +1,9 @@
 # PonchoOS Tutorial
 
-![](ponchoOS_summary.png)  
-
 ### Notes
 #### Poncho OS (sequential)
-- bootloader -> prepare struct bootInfo
-- kernel
+- __bootloader__ -> prepare struct bootInfo
+- __kernel__
     - prepareKernel
         - BasicRenderer
         - GDT //Global Descriptor Table (sections of memory)
