@@ -33,6 +33,8 @@ namespace PCI {
 				return "AMD";
 			case 0x10DE:
 				return "NVIDIA Corporation";
+            case 0x1AF4:
+                return "Red Hat, Inc.";
 		}
 		return to_hstring(vendorID);
 	}
@@ -50,6 +52,20 @@ namespace PCI {
                         return "6 port SATA Controller [AHCI mode]";
                     case 0x2930:
                         return "SMBus Controller";
+                    case 0x2934:
+                        return "82801I (ICH9 Family) USB UHCI Controller #1";
+                    case 0x2935:
+                        return "82801I (ICH9 Family) USB UHCI Controller #2";
+                    case 0x2936:
+                        return "82801I (ICH9 Family) USB UHCI Controller #3";
+                    case 0x293A:
+                        return "82801I (ICH9 Family) USB2 EHCI Controller #1";
+                }
+            case 0x1AF4: // Red hat
+                switch (deviceID)
+                {
+                case 0x1052:
+                    return "Virtio input";
                 }
         }
         return to_hstring(deviceID);

@@ -43,17 +43,17 @@ const char* to_hstring(uint64_t value) {
 }
 
 char hexTo_StringOutput32[128];
-const char* to_hstring(uint32_t value) {
+const char* to_hstring(uint32_t value){
     uint32_t* valPtr = &value;
     uint8_t* ptr;
-    uint8_t temp;
+    uint8_t tmp;
     uint8_t size = 4 * 2 - 1;
-    for (uint8_t i = 0; i < size; i++) {
+    for (uint8_t i = 0; i < size; i++){
         ptr = ((uint8_t*)valPtr + i);
-        temp = ((*ptr & 0xF0) >> 4);
-        hexTo_StringOutput32[size - (i * 2 + 1)] = temp + (temp > 9 ? 'A' : '0');
-        temp = ((*ptr & 0x0F));
-        hexTo_StringOutput32[size - (i * 2)] = temp + (temp > 9 ? 'A' : '0');
+        tmp = ((*ptr & 0xF0) >> 4);
+        hexTo_StringOutput32[size - (i * 2 + 1)] = tmp + (tmp > 9 ? 55 : '0');
+        tmp = ((*ptr & 0x0F));
+        hexTo_StringOutput32[size - (i * 2)] = tmp + (tmp > 9 ? 55 : '0');
     }
     hexTo_StringOutput32[size + 1] = 0;
     return hexTo_StringOutput32;
@@ -75,6 +75,20 @@ const char* to_hstring(uint16_t value) {
     }
     hexTo_StringOutput16[size + 1] = 0;
     return hexTo_StringOutput16;
+}
+
+char binTo_StringOutput16[128];
+const char* to_bstring(uint16_t value) {
+    uint16_t* valPtr = &value;
+    uint8_t temp;
+    for (uint8_t i = 0; i < 16; i++) {
+        temp = ((value & (0x0001 << i))) == 0;
+        binTo_StringOutput16[(15 - i) + 2] = (temp ? '0' : '1');
+    }
+    binTo_StringOutput16[0] = '0';
+    binTo_StringOutput16[1] = 'b';
+    binTo_StringOutput16[16 + 2 + 1] = 0;
+    return binTo_StringOutput16;
 }
 
 char hexTo_StringOutput8[128];

@@ -25,6 +25,14 @@
 - PCI -> Serial Bus
 - get access to Serial Bus ids first
 - figure out the outb and inb to interface with it
+- notes
+    - qemu existing acpi tables
+        - FACP - The Fixed ACPI Description Table starts with the “FACP” signature. 
+        - APIC - Application Policy Infrastructure Controller - Multiple APIC Description Table
+        - HPET - IA-PC High Precision Event Timer Table. See Links to ACPI-Related Documents under the heading “IA-PC High Precision Event Timer Table”.
+        - MCFG - PCI Express Memory-mapped Configuration Space base address description table. PCI Firmware Specification, Revision 3.0.
+        - WAET - Windows ACPI Emulated Devices Table**. See Links to ACPI-Related Documents under the heading “Windows ACPI Emulated Devices Table”.
+        - BGRT - Boot Graphics Resource Table
 
 
 #### bootInfo
@@ -50,6 +58,13 @@ struct bootInfo {
 |IDT|Interrupt Descriptor Table|
 |SDT|Service Descriptor Table|
 |MCFG|Memory Mapped Configuration Space Access (info about PCI configuration space base)|
+|LPC|Low Pin Count|
+|AHCI|Advanced Host Controller Interface (Protocal to communicate with Serial ATA(SATA) devices|
+|UPC|Unit Procedure Call|
+|USB SS|USB SuperSpeed|
+|USB CDC-ACM|USB Communications Device Class – Abstract Control Model|
+|BAR|Base Address Register|
+|SBRN|Serial Bus Release Bumber Register
 
 ### Structure
 |folder|sub-folder|what's inside|
@@ -68,6 +83,16 @@ struct bootInfo {
 ### TODO
 - LoadGDT asm
 - PCI Serial Bus
-- improve printing to screen
-- improve ClearChar
 - cursorColor & layers
+- update pci list/buffer devices
+
+
+### Resources
+- [https://github.com/cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tutorial)
+- [https://github.com/minoca/os](https://github.com/minoca/os)
+- [https://github.com/cia-foundation/TempleOS/tree/archive/Kernel](https://github.com/cia-foundation/TempleOS/tree/archive/Kernel)
+
+
+### Docs Websites
+- [https://uefi.org/specs/ACPI/6.4/05_ACPI_Software_Programming_Model/ACPI_Software_Programming_Model.html](https://uefi.org/specs/ACPI/6.4/05_ACPI_Software_Programming_Model/ACPI_Software_Programming_Model.html)
+- [https://pci-ids.ucw.cz/read/PD/](https://pci-ids.ucw.cz/read/PD/)

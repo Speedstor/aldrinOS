@@ -1,6 +1,7 @@
 #include "pci.h"
-#include "../storage/ahci.h"
+#include "storage/ahci.h"
 #include "../memory/heap.h"
+#include "usb/usb.h"
 
 namespace PCI {
     void EnumerateFunction(uint64_t deviceAddress, uint64_t function) {
@@ -13,15 +14,28 @@ namespace PCI {
             if (pciDeviceHeader->DeviceID == 0) return;
             if (pciDeviceHeader->DeviceID == 0xFFFF) return;
 
+            PRINT::Println("");
+
             PRINT::Print(GetVendorName(pciDeviceHeader->VendorID));
-            PRINT::Print(" / ");
+            PRINT::Print(" | ");
             PRINT::Print(GetDeviceName(pciDeviceHeader->VendorID, pciDeviceHeader->DeviceID));
-            PRINT::Print(" / ");
+            PRINT::Print(" | ");
 			PRINT::Print(DeviceClasses[pciDeviceHeader->Class]);
-            PRINT::Print(" / ");
+            PRINT::Print(" | ");
 			PRINT::Print(GetSubclassName(pciDeviceHeader->Class, pciDeviceHeader->Subclass));
-            PRINT::Print(" / ");
+            PRINT::Print(" | ");
 			PRINT::Print(GetProgIFName(pciDeviceHeader->Class, pciDeviceHeader->Subclass, pciDeviceHeader->ProgIF));
+            PRINT::Next();
+
+            PRINT::Print(to_hstring((uint32_t) pciDeviceHeader->VendorID));
+            PRINT::Print(" - ");
+            PRINT::Print(to_hstring((uint32_t) pciDeviceHeader->DeviceID));
+            PRINT::Print(" - ");
+            PRINT::Print(to_hstring((uint32_t) pciDeviceHeader->Class));
+            PRINT::Print(" - ");
+            PRINT::Print(to_hstring((uint32_t) pciDeviceHeader->Subclass));
+            PRINT::Print(" - ");
+            PRINT::Print(to_hstring((uint32_t) pciDeviceHeader->ProgIF));
             PRINT::Next();
 
             switch (pciDeviceHeader->Class) {
@@ -30,7 +44,20 @@ namespace PCI {
                         case 0x06: //serial ATA:
                             switch (pciDeviceHeader->ProgIF) {
                                 case 0x01: //AHCI 1.0 device
-								    new AHCI::AHCIDriver(pciDeviceHeader);	
+								    new AHCI::AHCIDriver(pciDeviceHeader);
+                                    break;	
+                            }
+                    }
+                case 0x0C: // Serial bus controller
+                    switch (pciDeviceHeader->Subclass) {
+                        case 0x03: // USB controller
+                            switch (pciDeviceHeader->ProgIF) {
+                                case 0x00: // UHCI
+                                    new USB::UHCIDriver(pciDeviceHeader);
+                                    break;
+                                case 0x20: // EHCI
+                                    new USB::EHCIDriver(pciDeviceHeader);
+                                    break;
                             }
                     }
             }
@@ -42,6 +69,8 @@ namespace PCI {
             g_PageTableManager.MapMemory((void*)deviceAddress, (void*)deviceAddress);
 
             PCIDeviceHeader* pciDeviceHeader = (PCIDeviceHeader*)deviceAddress;
+
+            PRINT::Print("Listing PCI Device Functions:");
 
             if (pciDeviceHeader->DeviceID == 0) return;
             if (pciDeviceHeader->DeviceID == 0xFFFF) return;

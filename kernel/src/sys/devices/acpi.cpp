@@ -1,4 +1,6 @@
 #include "acpi.h"
+#include "../../graphics/Print.h"
+#include "../../inc/cstr.h"
 
 namespace ACPI {
     void* FindTable(SDTHeader* sdtHeader, char* signature) {

@@ -72,6 +72,7 @@ void PrepareACPI(BootInfo* bootInfo) {
     ACPI::SDTHeader* xsdt = (ACPI::SDTHeader*)(bootInfo->rsdp->XSDTAddress);
 
     ACPI::MCFGHeader* mcfg = (ACPI::MCFGHeader*)ACPI::FindTable(xsdt, (char*)"MCFG");
+    //TODO: sanity check, for mcfg == 0 -> error
 
     PCI::EnumeratePCI(mcfg);
 }
