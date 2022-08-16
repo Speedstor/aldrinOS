@@ -77,7 +77,7 @@ namespace USB {
         uint8_t reserved0:2;
         uint8_t Isochronous_Scheduling_Threshold;
         uint32_t reserved1:24;
-    }
+    };
 
 
 
