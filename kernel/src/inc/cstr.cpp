@@ -34,9 +34,9 @@ const char* to_hstring(uint64_t value) {
     for (uint8_t i = 0; i < size; i++) {
         ptr = ((uint8_t*)valPtr + i);
         temp = ((*ptr & 0xF0) >> 4);
-        hexTo_StringOutput[size - (i * 2 + 1)] = temp + (temp > 9 ? 'A' : '0');
+        hexTo_StringOutput[size - (i * 2 + 1)] = temp + (temp > 9 ? 55 : '0');
         temp = ((*ptr & 0x0F));
-        hexTo_StringOutput[size - (i * 2)] = temp + (temp > 9 ? 'A' : '0');
+        hexTo_StringOutput[size - (i * 2)] = temp + (temp > 9 ? 55 : '0');
     }
     hexTo_StringOutput[size + 1] = 0;
     return hexTo_StringOutput;
@@ -69,9 +69,9 @@ const char* to_hstring(uint16_t value) {
     for (uint8_t i = 0; i < size; i++) {
         ptr = ((uint8_t*)valPtr + i);
         temp = ((*ptr & 0xF0) >> 4);
-        hexTo_StringOutput16[size - (i * 2 + 1)] = temp + (temp > 9 ? 'A' : '0');
+        hexTo_StringOutput16[size - (i * 2 + 1)] = temp + (temp > 9 ? 55 : '0');
         temp = ((*ptr & 0x0F));
-        hexTo_StringOutput16[size - (i * 2)] = temp + (temp > 9 ? 'A' : '0');
+        hexTo_StringOutput16[size - (i * 2)] = temp + (temp > 9 ? 55 : '0');
     }
     hexTo_StringOutput16[size + 1] = 0;
     return hexTo_StringOutput16;
@@ -100,9 +100,9 @@ const char* to_hstring(uint8_t value) {
     for (uint8_t i = 0; i < size; i++) {
         ptr = ((uint8_t*)valPtr + i);
         temp = ((*ptr & 0xF0) >> 4);
-        hexTo_StringOutput8[size - (i * 2 + 1)] = temp + (temp > 9 ? 'A' : '0');
+        hexTo_StringOutput8[size - (i * 2 + 1)] = temp + (temp > 9 ? 55 : '0');
         temp = ((*ptr & 0x0F));
-        hexTo_StringOutput8[size - (i * 2)] = temp + (temp > 9 ? 'A' : '0');
+        hexTo_StringOutput8[size - (i * 2)] = temp + (temp > 9 ? 55 : '0');
     }
     hexTo_StringOutput8[size + 1] = 0;
     return hexTo_StringOutput8;

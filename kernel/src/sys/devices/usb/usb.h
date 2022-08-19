@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "../pci.h"
+#include "EhciStructs.h"
 
 namespace USB {
     enum PortType {
@@ -29,55 +30,12 @@ namespace USB {
         uint32_t Reserved1 = 0;
     };
 
-    enum EHCIRegisters {
-        USBCMD = 0x00,
-        USBSTS = 0x04,
-        USBINTR = 0x08,
-        FRINDEX = 0x0C,
-        CTRLDSSEGMENT = 0x10,
-        PERIODICLISTBASE = 0x14,
-        ASYNCLISTADDR = 0x18,
-        CONFIGFLAG = 0x40,
-        PORTSC_BASE = 0x44
-    };
-
-    //
-    // Define EHCI capability register offsets.
-    //
-
-    #define EHCI_CAPABILITY_LENGTH_REGISTER                0x00
-    #define EHCI_CAPABILITY_VERSION_REGISTER               0x02
-    #define EHCI_CAPABILITY_PARAMETERS_REGISTER            0x04
-    #define EHCI_CAPABILITY_PARAMETERS_PORT_COUNT_MASK     0x0000000F
-    #define EHCI_CAPABILITY_CAPABILITIES_REGISTER          0x08
-    #define EHCI_CAPABILITY_CAPABILITIES_EXTENDED_CAPABILITIES_MASK 0x0000FF00
-    #define EHCI_CAPABILITY_CAPABILITIES_EXTENDED_CAPABILITIES_SHIFT 8
-    #define EHCI_CAPABILITY_PORT_ROUTING_REGISTER          0x0C
 
     #define USB_BASE_OFFSET 0x10
     #define PCI_SBRN_OFFSET 0x60
     #define PCI_FLADJ_OFFSET 0x61
     #define PCI_PWAKECAP_OFFSET 0x62
 
-    struct HCStructural {
-        uint8_t NumPorts:4;
-        uint8_t PortPowerCtl:1;
-        uint8_t reserved0:2;
-        uint8_t PortRouting:1;
-        uint8_t PortsPerCompanion:4;
-        uint8_t PortIndicator:1;
-        uint8_t reserved1:3;
-        uint8_t DebugPort:4;
-        uint8_t reserved2;
-    } __attribute__((packed));
-
-    struct HCCapability {
-        uint8_t Addr64:1;
-        uint8_t FrameList1024:1;
-        uint8_t reserved0:2;
-        uint8_t Isochronous_Scheduling_Threshold;
-        uint32_t reserved1:24;
-    };
 
 
 
@@ -88,17 +46,45 @@ namespace USB {
         PCI::PCIDeviceHeader* pciBaseAddress;
     };
 
-    class EHCIDriver {
-        public:
-        EHCIDriver(PCI::PCIDeviceHeader* pciBaseAddress);
-        ~EHCIDriver();
-        PCI::PCIDeviceHeader* pciBaseAddress;
+
+    struct EhciInfo {
         uint8_t SBRN;
         uint8_t FLADJ;
         uint16_t PWAKECAP;
         uint32_t UsbBase;
         uint32_t UsbOperateBase;
-        uint8_t Version;
+        uint16_t Version;
+    };
+
+    struct EhciController
+    {
+        EhciInfo info;
+        EhciCapbilites* capRegs;
+        EhciOperations* opRegs;
+        uint32_t *frameList;
+        EhciQueueHead* queueHeadPool;
+        EhciTransferDescriptor* transferDescriptorsPool;
+        EhciQueueHead* asyncQueueHead;
+        EhciQueueHead* periodicQueueHead;
+    };
+
+    class EHCIDriver {
+        public:
+        EHCIDriver(PCI::PCIDeviceHeader* pciBaseAddress);
+        ~EHCIDriver();
+        PCI::PCIDeviceHeader* pciBaseAddress;
+        EhciController hc;
+        void enumeratePorts();
+
+        private:
+        EhciQueueHead* getFreeQueueHead();
+
+
+        #if 0 // NOTES
+            uint8_t SBRN = *((uint8_t*) ((uint64_t) pciBaseAddress + PCI_SBRN_OFFSET));
+            uint8_t FLADJ = *((uint8_t*) ((uint64_t) pciBaseAddress + PCI_FLADJ_OFFSET));
+            uint16_t PWAKECAP = *((uint16_t*) ((uint64_t) pciBaseAddress + PCI_PWAKECAP_OFFSET));
+        #endif
     };
 }
 

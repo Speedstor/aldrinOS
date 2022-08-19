@@ -94,14 +94,16 @@ KernelInfo InitializeKernel(BootInfo* bootInfo) {
     PrepareInterrupts();
 
     InitializeHeap((void*)0x0000100000000000, 0x10);
-
-    InitPS2Mouse();
+    
     PrepareACPI(bootInfo);
 
-
+    InitPS2Mouse();
     outb(PIC1_DATA, 0b11111000);
     outb(PIC2_DATA, 0b11101111);
 
     asm ("sti");
+
+    
+
     return kernelInfo;
 }
