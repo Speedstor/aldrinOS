@@ -6,6 +6,7 @@
 #include "../../../inc/cstr.h"
 #include "../../memory/heap.h"
 #include "../../memory/memory.h"
+#include "../IO.h"
 
 namespace USB {
 
@@ -115,14 +116,15 @@ namespace USB {
         // disable interrupts TODO:: ?? would want interrupts i think
         hc.opRegs->UsbIntr = 0;
 
-        #define CMD_ITC_SHIFT 16
-        #define CMD_PSE (1 << 4)
-        #define CMD_ASE (1 << 5)
-        #define CMD_RS (1 << 0)
+        #define CMD_ITC_SHIFT 16 //Interrupt Threshold Control
+        #define CMD_PSE (1 << 4) //Periodic Schedule Enable
+        #define CMD_ASE (1 << 5) //Asynchronous Schedule Enable
+        #define CMD_RS (1 << 0) //Run/Stop - Run Host Controller proceeds with execution of the schedule
         hc.opRegs->UsbCmd = (8 << CMD_ITC_SHIFT) | CMD_PSE | CMD_ASE | CMD_RS;
         hc.opRegs->ConfigFlags = 1; //start controller
 
         //wait
+        io_wait();
         enumeratePorts();
 
 

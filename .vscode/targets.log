@@ -1,4 +1,6 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make: *** No rule to make target 'all'.  Stop.
+
 # GNU Make 4.3
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2020 Free Software Foundation, Inc.
@@ -6,7 +8,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Aug 18 17:20:19 2022
+# Make data base, printed on Fri Aug 26 14:48:01 2022
 
 # Variables
 
@@ -23,7 +25,7 @@ LOG_LEVEL = info
 # environment
 GJS_DEBUG_OUTPUT = stderr
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-8f9720d2-d057-4d05-9778-d4ff030f1b12.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-d3a36beb-3059-4751-b176-32cf46bb4cd7.sock
 # environment
 VSCODE_CWD = /home/wistorio
 # environment
@@ -93,13 +95,13 @@ MAKEFILE_LIST :=
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-VSCODE_PID = 6183
+VSCODE_PID = 7536
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # environment
-SESSION_MANAGER = local/wistorio-thinkpad:@/tmp/.ICE-unix/3276,unix/wistorio-thinkpad:/tmp/.ICE-unix/3276
+SESSION_MANAGER = local/wistorio-thinkpad:@/tmp/.ICE-unix/3327,unix/wistorio-thinkpad:/tmp/.ICE-unix/3327
 # automatic
 *F = $(notdir $*)
 # environment
@@ -137,7 +139,7 @@ MAKEFILES :=
 # environment
 TZ = America/Los_Angeles
 # environment
-INVOCATION_ID = 54833714d42148d9b18f11a0b19fb165
+INVOCATION_ID = bf5b63a7fdee42478be2532dcdfb185e
 # environment
 VSCODE_LOG_NATIVE = false
 # environment
@@ -161,13 +163,13 @@ GNUMAKEFLAGS :=
 # environment
 LOGNAME = wistorio
 # environment
-LOG_DST = /home/wistorio/.config/Code/logs/20220818T171959/exthost2/dendron.dendron/dendron.log
+LOG_DST = /home/wistorio/.config/Code/logs/20220826T144741/exthost2/dendron.dendron/dendron.log
 # environment
 GIO_LAUNCHED_DESKTOP_FILE = /usr/share/applications/code.desktop
 # makefile
 .DEFAULT_GOAL := 
 # environment
-SYSTEMD_EXEC_PID = 3295
+SYSTEMD_EXEC_PID = 3346
 # environment
 DISPLAY = :1
 # environment
@@ -177,9 +179,9 @@ GTK_MODULES = gail:atk-bridge
 # default
 MAKE_VERSION := 4.3
 # environment
-MANAGERPID = 2646
+MANAGERPID = 2691
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 6183
+GIO_LAUNCHED_DESKTOP_FILE_PID = 7536
 # environment
 _ = /usr/share/code/code
 # environment
@@ -187,7 +189,7 @@ XDG_RUNTIME_DIR = /run/user/1000
 # environment
 GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
-JOURNAL_STREAM = 8:37483
+JOURNAL_STREAM = 8:48132
 # environment
 XDG_SESSION_CLASS = user
 # environment
@@ -279,9 +281,6 @@ GNUmakefile:
 # strcache performance: lookups = 25 / hit rate = 12%
 # hash-table stats:
 # Load=22/8192=0%, Rehash=0, Collisions=0/25=0%
-# Finished Make data base on Thu Aug 18 17:20:19 2022
- 
-make: *** No rule to make target 'all'.  Stop.
-
+# Finished Make data base on Fri Aug 26 14:48:01 2022
 
  

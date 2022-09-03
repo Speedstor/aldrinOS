@@ -1,0 +1,157 @@
+{
+  "main": {
+    "id": "84c0f9c9d52746f6",
+    "type": "split",
+    "children": [
+      {
+        "id": "15381bdabe800dcd",
+        "type": "leaf",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "Inline Assembly.md",
+            "mode": "source",
+            "source": false
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "eb5a5e28f4fe8842",
+    "type": "split",
+    "children": [
+      {
+        "id": "7d051834357e7656",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e5d00eece010b7fa",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "b352bfe24184c157",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "4cc7b73c2f6f4666",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "1985b603e7344dd3",
+    "type": "split",
+    "children": [
+      {
+        "id": "80a91b413e1dccba",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2a227d698caa915b",
+            "type": "leaf",
+            "state": {
+              "type": "calendar",
+              "state": {}
+            }
+          },
+          {
+            "id": "d149bd615d790ce0",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Inline Assembly.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "576fd8c9b1fbc2fb",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Inline Assembly.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "6337dd69ef5f593a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "f0634e72e7f6680c",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Inline Assembly.md"
+              }
+            }
+          },
+          {
+            "id": "570b85148213f092",
+            "type": "leaf",
+            "state": {
+              "type": "FANTASY_CALENDAR",
+              "state": {}
+            }
+          }
+        ],
+        "currentTab": 5
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "15381bdabe800dcd",
+  "lastOpenFiles": [
+    "Inline Assembly.md",
+    "school/2022summer/cse21/counting.md",
+    "index.md",
+    "quick-notes.md",
+    "README.md",
+    "daily/2022-08-22.md"
+  ]
+}
