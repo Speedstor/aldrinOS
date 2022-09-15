@@ -1,7 +1,7 @@
 #include "pci.h"
 #include "storage/ahci.h"
 #include "../memory/heap.h"
-#include "usb/usb.h"
+#include "usb/ehci.h"
 
 namespace PCI {
     void EnumerateFunction(uint64_t deviceAddress, uint64_t function) {
@@ -43,18 +43,18 @@ namespace PCI {
                     switch (pciDeviceHeader->Subclass) {
                         case 0x06: //serial ATA:
                             switch (pciDeviceHeader->ProgIF) {
-                                case 0x01: //AHCI 1.0 device
-								    new AHCI::AHCIDriver(pciDeviceHeader);
-                                    break;	
+                                // case 0x01: //AHCI 1.0 device
+								//     new AHCI::AHCIDriver(pciDeviceHeader);
+                                //     break;	
                             }
                     }
                 case 0x0C: // Serial bus controller
                     switch (pciDeviceHeader->Subclass) {
                         case 0x03: // USB controller
                             switch (pciDeviceHeader->ProgIF) {
-                                case 0x00: // UHCI
-                                    new USB::UHCIDriver(pciDeviceHeader);
-                                    break;
+                                // case 0x00: // UHCI
+                                //     new USB::UHCIDriver(pciDeviceHeader);
+                                //     break;
                                 case 0x20: // EHCI
                                     new USB::EHCIDriver(pciDeviceHeader);
                                     break;

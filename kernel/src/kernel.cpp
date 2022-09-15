@@ -8,6 +8,6 @@ extern "C" void _start(BootInfo* bootInfo) {
     PageTableManager* pageTableManager = kernelInfo.pageTableManager;
 
     while(true) {
-        asm ("hlt");
+        // asm ("hlt");
     }
 }

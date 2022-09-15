@@ -4,6 +4,7 @@
 #include "../interrupts/interrupts.h"
 #include "../devices/IO.h"
 #include "../memory/heap.h"
+#include "../time/pit.h"
 
 KernelInfo kernelInfo;
 void PrepareMemory(BootInfo* bootInfo) {
@@ -75,6 +76,8 @@ void PrepareACPI(BootInfo* bootInfo) {
     //TODO: sanity check, for mcfg == 0 -> error
 
     PCI::EnumeratePCI(mcfg);
+
+    PRINT::Println("Finished Enumerating PCI");
 }
 
 BasicRenderer r = BasicRenderer(NULL, NULL);
@@ -92,18 +95,15 @@ KernelInfo InitializeKernel(BootInfo* bootInfo) {
     memset(bootInfo->framebuffer->BaseAddress, 0, bootInfo->framebuffer->BufferSize);
     
     PrepareInterrupts();
+    InitPS2Mouse();
+    outb(PIC1_DATA, 0b11111000);
+    outb(PIC2_DATA, 0b11101111);
+    asm ("sti");
+    PIT::SetDivisor(65535);
 
     InitializeHeap((void*)0x0000100000000000, 0x10);
     
     PrepareACPI(bootInfo);
-
-    InitPS2Mouse();
-    outb(PIC1_DATA, 0b11111000);
-    outb(PIC2_DATA, 0b11101111);
-
-    asm ("sti");
-
-    
 
     return kernelInfo;
 }

@@ -3,6 +3,7 @@
 #include "../devices/IO.h"
 #include "../../userinput/keyboard.h"
 #include "../time/pit.h"
+#include "../../graphics/Print.h"
 
 __attribute__((interrupt)) void PageFault_handler(struct interrupt_frame* frame) {
     Panic("Page Fault Raised");

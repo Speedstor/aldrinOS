@@ -5,7 +5,6 @@
 
 namespace USB {
     // Ehci --------
-
     struct EhciStructuralParams {
         uint8_t NumPorts:4;
         uint8_t PortPowerCtl:1;
@@ -27,27 +26,39 @@ namespace USB {
         uint32_t reserved1:24;
     };
 
-    // mindshare whitepaper p.16
-    struct EhciCapbilites {
-        uint8_t length;
-        uint8_t reserved;
-        uint16_t version;
-        EhciStructuralParams structuralParams;
-        EhciCapabilityParams capabilityParams;
-        uint64_t CompanionPortRoutes:60;
-    } __attribute__((packed));
 
-    struct EhciOperations {
-        uint32_t UsbCmd;
-        uint32_t UsbSts;
-        uint32_t UsbIntr;
-        uint32_t FrameIndex;
-        uint32_t CtlDataSegement;   // CTRLDSSEGMENT
-        uint32_t PeriodicList;
-        uint32_t NextAsyncList;
-        uint32_t reserv[9];
-        uint32_t ConfigFlags;
-        uint32_t PortStsCtl;
+    // USBSTS
+    #define USBSTS_USBINT (1 << 0)
+    #define USBSTS_USBERRINT (1 << 1)
+    #define USBSTS_PORT_CHANGE_DETECT (1 << 2)
+    #define USBSTS_FRAME_LIST_ROLLOVER (1 << 3)
+    #define USBSTS_HOST_SYSTEM_ERROR (1 << 4)
+    #define USBSTS_INERRUPT_ON_ASYNC_ADVANCE (1 << 5)
+    #define USBSTS_HCHALTED (1 << 12)
+    #define USBSTS_RECLAMATION (1 << 13)
+    #define USBSTS_PERIODIC_SCHEDULE_STATUS (1 << 14)
+    #define USBSTS_ASYNCHRONOUS_SCHEDULE_STATUS (1 << 15)
+
+    struct PortSC {
+        uint8_t CurrentConnectStatus:1;
+        uint8_t ConnectStatusChange:1;
+        uint8_t PortEnabled:1;
+        uint8_t PortEnableChange:1;
+        uint8_t OvercurrentActive:1;
+        uint8_t OvercurrentChange:1;
+        uint8_t ForcePortResume:1;
+        uint8_t Suspend:1;
+        uint8_t PortReset:1;
+        uint8_t reserved1:1;
+        uint8_t LineStatus:2;
+        uint8_t PortPower:1;
+        uint8_t PortOwner:1;
+        uint8_t PortIndicator:2;
+        uint8_t PortTestControl:4;
+        uint8_t WakeOnConnectEnable:1;
+        uint8_t WakeOnDisconnectEnable:1;
+        uint8_t WakeOnOvercurrentEnable:1;
+        uint16_t reserved2:9;
     } __attribute__((packed));
 
     struct EhciTransferDescriptor {
@@ -128,6 +139,29 @@ namespace USB {
         uint32_t active;
         uint8_t pad[20];
     };
+
+    // mindshare whitepaper p.16
+    struct EhciCapbilites {
+        uint8_t length;
+        uint8_t reserved;
+        uint16_t version;
+        EhciStructuralParams structuralParams;
+        EhciCapabilityParams capabilityParams;
+        uint64_t CompanionPortRoutes:60;
+    } __attribute__((packed));
+    
+    struct EhciOperations {
+        uint32_t UsbCmd;
+        uint32_t UsbSts;
+        uint32_t UsbIntr;
+        uint32_t FrameIndex;
+        uint32_t CtlDataSegement;   // CTRLDSSEGMENT
+        uint32_t PeriodicList;
+        uint32_t NextAsyncList;
+        uint32_t reserv[9];
+        uint32_t ConfigFlag;
+        PortSC PortStsCtl;
+    } __attribute__((packed));
 }
 
 #endif
