@@ -4,7 +4,7 @@
 - Poncho's Tutorial code Github Repo: [https://github.com/Absurdponcho/PonchoOS](https://github.com/Absurdponcho/PonchoOS)
 
 ### Notes
-#### Poncho OS (sequential)
+#### Kernel Setup Outline (sequential)
 - __bootloader__ -> prepare struct bootInfo
 - __kernel__
     - prepareKernel
