@@ -1,4 +1,4 @@
-# PonchoOS -> Aldrin OS
+# Aldrin OS
 - This OS started with following the tutorial of from Youtuber [Poncho](https://www.youtube.com/channel/UC15iQ_QzTPxB6yGzzifJfKA)
 - After finishing the tutorial, I have been trying to add USB compability. While improving on existing code's organization and efficiency.
 - Poncho's Tutorial code Github Repo: [https://github.com/Absurdponcho/PonchoOS](https://github.com/Absurdponcho/PonchoOS)
