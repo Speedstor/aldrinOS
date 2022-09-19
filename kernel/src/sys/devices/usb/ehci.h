@@ -66,16 +66,16 @@ namespace USB {
         EhciController hc;
         void enumeratePorts();
         void HandlePortChange_Interrupt();
-        void PortSuspend(PortSC* portStsCtl);
-        void PortResume(PortSC* portStsCtl);
+        void PortSuspend(uint32_t* portStsCtl);
+        void PortResume(uint32_t* portStsCtl);
 
         private:
         EhciQueueHead* getFreeQueueHead();
         void initAsyncQueueHead(EhciQueueHead* queueHead);
         void initPeriodicQueueHead(EhciQueueHead* queueHead);
         uint32_t* initFrameList(EhciOperations* opRegs);
-        void PortChange(PortSC* portStsCtl);
-        void TransferToPort(PortSC* portStsCtl);
+        uint8_t PortChange(uint32_t* portStsCtl);
+        void TransferToPort(uint32_t* portStsCtl);
 
 
 
@@ -86,6 +86,11 @@ namespace USB {
             uint16_t PWAKECAP = *((uint16_t*) ((uint64_t) pciBaseAddress + PCI_PWAKECAP_OFFSET));
         #endif
     };
+
+    
+    namespace HELPER {
+        void printOpRegs(EhciOperations* opRegs);
+    }
 }
 
 #endif

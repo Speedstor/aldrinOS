@@ -73,6 +73,17 @@ run:
 	-m 256M -cpu qemu64 \
 	-drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE-pure-efi.fd",readonly=on \
 	-drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS-pure-efi.fd" -net none \
+    -drive if=none,id=usbstick,format=raw,file=$(BUILDDIR)/usb.img   \
+	-device usb-ehci,id=ehci                                    \
+	-device usb-mouse,bus=ehci.0    							\
+    -device usb-storage,bus=ehci.0,drive=usbstick		\
+
+
+comment-out:
+	qemu-system-x86_64 -machine q35 \
+	-usb 														\
+	-device usb-host,hostbus=1,hostport=2 					\
 	-device virtio-mouse \
 	-device virtio-keyboard \
 	-usb -device usb-host,hostbus=1
+	-usb -device usb-host,hostbus=1								\

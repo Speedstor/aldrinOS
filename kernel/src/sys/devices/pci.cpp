@@ -43,9 +43,9 @@ namespace PCI {
                     switch (pciDeviceHeader->Subclass) {
                         case 0x06: //serial ATA:
                             switch (pciDeviceHeader->ProgIF) {
-                                // case 0x01: //AHCI 1.0 device
-								//     new AHCI::AHCIDriver(pciDeviceHeader);
-                                //     break;	
+                                case 0x01: //AHCI 1.0 device
+								    new AHCI::AHCIDriver(pciDeviceHeader);
+                                    break;	
                             }
                     }
                 case 0x0C: // Serial bus controller
@@ -69,8 +69,6 @@ namespace PCI {
             g_PageTableManager.MapMemory((void*)deviceAddress, (void*)deviceAddress);
 
             PCIDeviceHeader* pciDeviceHeader = (PCIDeviceHeader*)deviceAddress;
-
-            PRINT::Print("Listing PCI Device Functions:");
 
             if (pciDeviceHeader->DeviceID == 0) return;
             if (pciDeviceHeader->DeviceID == 0xFFFF) return;

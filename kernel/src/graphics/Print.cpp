@@ -1,4 +1,5 @@
 #include "Print.h"
+#include "../sys/time/pit.h"
 
 PRINT_VARS PrintVars;
 
@@ -14,6 +15,12 @@ namespace PRINT{
         if (PrintVars.CursorPosition.X + 8 > PrintVars.Width) {
             PrintVars.CursorPosition.X = 0;
             PrintVars.CursorPosition.Y += 16;
+        }
+
+        if (PrintVars.CursorPosition.Y + 32 > PrintVars.Height) {
+            GlobalRenderer->Clear();
+            PrintVars.CursorPosition = {0, 0};
+            Println("cleared");
         }
     }
 

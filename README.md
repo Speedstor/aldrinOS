@@ -94,7 +94,8 @@ struct bootInfo {
 ### Resources
 - [https://github.com/cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tutorial)
 - [https://github.com/minoca/os](https://github.com/minoca/os)
-- [https://github.com/cia-foundation/TempleOS/tree/archive/Kernel](https://github.com/cia-foundation/TempleOS/tree/archive/Kernel)
+- [https://github.com/cia-foundation/TempleOS/tree/archive/Kernel](https://github.com/cia-foundation/TempleOS/tree/archive/Kernel)j
+- [https://forum.osdev.org/viewtopic.php?f=1&t=32261&start=15](https://forum.osdev.org/viewtopic.php?f=1&t=32261&start=15)
 
 
 ### Docs Websites

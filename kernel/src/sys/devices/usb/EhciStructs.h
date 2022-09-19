@@ -39,27 +39,31 @@ namespace USB {
     #define USBSTS_PERIODIC_SCHEDULE_STATUS (1 << 14)
     #define USBSTS_ASYNCHRONOUS_SCHEDULE_STATUS (1 << 15)
 
-    struct PortSC {
-        uint8_t CurrentConnectStatus:1;
-        uint8_t ConnectStatusChange:1;
-        uint8_t PortEnabled:1;
-        uint8_t PortEnableChange:1;
-        uint8_t OvercurrentActive:1;
-        uint8_t OvercurrentChange:1;
-        uint8_t ForcePortResume:1;
-        uint8_t Suspend:1;
-        uint8_t PortReset:1;
-        uint8_t reserved1:1;
-        uint8_t LineStatus:2;
-        uint8_t PortPower:1;
-        uint8_t PortOwner:1;
-        uint8_t PortIndicator:2;
-        uint8_t PortTestControl:4;
-        uint8_t WakeOnConnectEnable:1;
-        uint8_t WakeOnDisconnectEnable:1;
-        uint8_t WakeOnOvercurrentEnable:1;
-        uint16_t reserved2:9;
-    } __attribute__((packed));
+
+    // ------------------------------------------------------------------------------------------------
+    // Port Status and Control Registers
+    #define EHCI_PORTSC_OFFSET                   0x44
+    #define EHCI_PORT_CONNECTION                 (1 << 0)    // Current Connect Status
+    #define EHCI_PORT_CONNECTION_CHANGE          (1 << 1)    // Connect Status Change
+    #define EHCI_PORT_ENABLE                     (1 << 2)    // Port Enabled
+    #define EHCI_PORT_ENABLE_CHANGE              (1 << 3)    // Port Enable Change
+    #define EHCI_PORT_OVER_CURRENT               (1 << 4)    // Over-current Active
+    #define EHCI_PORT_OVER_CURRENT_CHANGE        (1 << 5)    // Over-current Change
+    #define EHCI_PORT_FORCE_PORT_RESUME          (1 << 6)    // Force Port Resume
+    #define EHCI_PORT_SUSPEND                    (1 << 7)    // Suspend
+    #define EHCI_PORT_RESET                      (1 << 8)    // Port Reset
+    #define EHCI_PORT_LS_MASK                    (3 << 10)   // Line Status
+    #define EHCI_PORT_LS_SHIFT                   10
+    #define EHCI_PORT_POWER                      (1 << 12)   // Port Power
+    #define EHCI_PORT_OWNER                      (1 << 13)   // Port Owner
+    #define EHCI_PORT_IC_MASK                    (3 << 14)   // Port Indicator Control
+    #define EHCI_PORT_IC_SHIFT                   14
+    #define EHCI_PORT_TC_MASK                    (15 << 16)  // Port Test Control
+    #define EHCI_PORT_TC_SHIFT                   16
+    #define EHCI_PORT_WKCNNT_E                   (1 << 20)   // Wake on Connect Enable
+    #define EHCI_PORT_WKDSCNNT_E                 (1 << 21)   // Wake on Disconnect Enable
+    #define EHCI_PORT_WKOC_E                     (1 << 22)   // Wake on Over-current Enable
+    #define EHCI_PORT_RWC                        (PORT_CONNECTION_CHANGE | PORT_ENABLE_CHANGE | PORT_OVER_CURRENT_CHANGE)
 
     struct EhciTransferDescriptor {
         volatile uint32_t link;
@@ -160,7 +164,7 @@ namespace USB {
         uint32_t NextAsyncList;
         uint32_t reserv[9];
         uint32_t ConfigFlag;
-        PortSC PortStsCtl;
+        uint32_t PortStsCtl;
     } __attribute__((packed));
 }
 
