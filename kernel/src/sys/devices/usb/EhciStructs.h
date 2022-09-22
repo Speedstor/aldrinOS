@@ -65,19 +65,6 @@ namespace USB {
     #define EHCI_PORT_WKOC_E                     (1 << 22)   // Wake on Over-current Enable
     #define EHCI_PORT_RWC                        (PORT_CONNECTION_CHANGE | PORT_ENABLE_CHANGE | PORT_OVER_CURRENT_CHANGE)
 
-    struct EhciTransferDescriptor {
-        volatile uint32_t link;
-        volatile uint32_t altLink;
-        volatile uint32_t token;
-        volatile uint32_t buffer[5];
-        volatile uint32_t extBuffer[5];
-
-        // internal fields
-        uint32_t tdNext;
-        uint32_t active;
-        uint8_t pad[4];
-    } __attribute__((packed));
-
     struct Link {
         struct Link *prev;
         struct Link *next;
@@ -123,26 +110,54 @@ namespace USB {
     } UsbTransfer;
 
 
-    struct EhciQueueHead {
+    // should be 32 byte in size to be 32 byte aligned (32 bit is 4 bytes)
+    struct QH {
         uint32_t qhlp;       // Queue Head Horizontal Link Pointer
         uint32_t ch;         // Endpoint Characteristics
         uint32_t caps;       // Endpoint Capabilities
         volatile uint32_t curLink;
+        // --- 16 bytes
 
         // matches a transfer descriptor
         volatile uint32_t nextLink;
         volatile uint32_t altLink;
         volatile uint32_t token;
         volatile uint32_t buffer[5];
-        volatile uint32_t extBuffer[5];
+        // --- 48 bytes
 
-        // internal fields
-        UsbTransfer *transfer;
-        Link qhLink;
-        uint32_t tdHead;
-        uint32_t active;
-        uint8_t pad[20];
+        // custom software fields
+        uint32_t field1;
+        uint32_t field2;
+        uint32_t field3;
+        uint32_t field4;
+        // --- 64 bytes
     };
+
+    //should be 32bytes to align with 32bytes
+    struct qTD {
+        volatile uint32_t link;
+        volatile uint32_t altLink;
+        volatile uint32_t token;
+        volatile uint32_t buffer[5];
+        // --- 32 bytes
+    } __attribute__((packed));
+
+    #define QTD_NEXT_TERMINATE (1 << 0)
+
+    #define QTD_TOKEN_DATA_TOGGLE (1 << 31)
+    #define QTD_TOKEN_LENGTH_SHIFT 16
+    #define QTD_TOKEN_IOC (1 << 15)
+    #define QTD_TOKEN_CURRENT_PAGE_SHIFT 12
+    #define QTD_TOKEN_ERROR_COUNTER_SHIFT 10
+    #define QTD_TOKEN_PID_SHIFT 8
+    #define QTD_TOKEN_STATUS_ACTIVE (1 << 7)
+    #define QTD_TOKEN_STATUS_HALTED (1 << 6)
+    #define QTD_TOKEN_STATUS_BUFFER_ERROR (1 << 5)
+    #define QTD_TOKEN_STATUS_BABBLE_DETECTED (1 << 4)
+    #define QTD_TOKEN_STATUS_TRANSACTION_ERROR (1 << 3)
+    #define QTD_TOKEN_STATUS_MISSED_MFRAME (1 << 2)
+    #define QTD_TOKEN_STATUS_SPLIT_TRANSACTION_STATUS (1 << 1)
+    #define QTD_TOKEN_STATUS_PING (1 << 0)
 
     // mindshare whitepaper p.16
     struct EhciCapbilites {

@@ -7,18 +7,39 @@
 #include "../../memory/memory.h"
 #include "../IO.h"
 #include "../../time/pit.h"
+#include "../../memory/paging/PageFrameAllocator.h"
 
 namespace USB {
-    
-    #define MAX_QH  16   //TODO:: make 1024
-    #define MAX_TD  32
-    EhciQueueHead* EHCIDriver::getFreeQueueHead() {
-        EhciQueueHead* pEnd = hc.queueHeadPool + MAX_QH;
-        for (EhciQueueHead* qh = hc.queueHeadPool; qh != pEnd; qh++) {
-            if (!qh->active) {
-                qh->active = 1;
-                return qh;
-            }
+    void populateTransferDescriptor(
+        qTD** pTransferDescriptor, 
+        uint8_t dataToggle,
+        uint16_t length,
+        uint8_t ioc,
+        uint8_t countErr,
+        uint8_t PID,
+        uint8_t status,
+        void* data
+    ) {
+        qTD* transferDescriptor = *pTransferDescriptor;
+        
+    }
+
+
+    //TODO:: figuring out if deallocating queue heads are possible, and to implement it if so
+    QH* EHCIDriver::getFreeQueueHead() {
+        QH* avaliableQueueHead = (QH*) freeMemoryPointer;
+        freeMemoryPointer += sizeof(QH); //sizeof(QH) should be at least multiple of 32bytes, and should be 64
+        if (freeMemoryPointer < EHCIMemoryPageEnd) {
+            return avaliableQueueHead;
+        }
+        return 0;
+    }
+
+    qTD* EHCIDriver::getqTD() {
+        qTD* avaliableqTD = (qTD*) freeMemoryPointer;
+        freeMemoryPointer += sizeof(qTD);
+        if (freeMemoryPointer < EHCIMemoryPageEnd) {
+            return avaliableqTD;
         }
         return 0;
     }
@@ -69,7 +90,7 @@ namespace USB {
         if (!(*(uint32_t*) portStsCtl) & (1 << 2))
             return 0;
 
-        PRINT::Println(" Device Connected");
+        PRINT::Print(" Device Connected | ");
 
         PRINT::Print("portSC now is: ");
         PRINT::Print(to_hstring(*portStsCtl));
@@ -78,12 +99,28 @@ namespace USB {
         // Request GET DEVICE DESCRIPTOR
         #define REQ_SET_ADDR 0x06
 
-        // set up async queue head
+        // create SETUP packet
+        qTD* transferDescriptor = getqTD();
+        populateTransferDescriptor(
+            transferDescriptor,
+            dataToggle,
+            length,
+            ioc,
+            countErr,
+            PID,
+            status,
+            data
+        );
+
+
+
+
+        // link it to async packet
         
 
         // store device descriptor
 
-
+        return 1;
     }
 
     void EHCIDriver::HandlePortChange_Interrupt() {
@@ -105,7 +142,7 @@ namespace USB {
         for (int8_t i = 0; i < numPorts; i++) {
             if (*(portStsCtls + i) & EHCI_PORT_CONNECTION_CHANGE) {
                 PRINT::Print("PortSC base addr: ");
-                PRINT::Print(to_hstring(*(uint32_t*)&portStsCtls[i]));
+                PRINT::Print(to_hstring((uint64_t) &portStsCtls[i]));
                 PRINT::Print(" | ");
                 PRINT::Print("PortSC hex: ");
                 PRINT::Print(to_hstring(portStsCtls[i]));
@@ -115,44 +152,29 @@ namespace USB {
         }
     }
 
+
     #define SET_TERMINATE (1 << 0)
     #define SET_QH_FLAG (1 << 1)
-
-    uint32_t* EHCIDriver::initFrameList(EhciOperations* opRegs) {
-        // frame list
-        uint32_t* frameList = (uint32_t*) malloc(1024 * sizeof(uint32_t));
-        for (uint16_t i = 0; i < 1024; ++i)
-        {
-            frameList[i] = SET_QH_FLAG | (uint64_t)(uint32_t*)hc.periodicQueueHead;
-        }
-        hc.opRegs->FrameIndex = 0;
-        hc.opRegs->PeriodicList = (uint64_t) hc.frameList;
-
-        return frameList;
-    }
-
-    void EHCIDriver::initAsyncQueueHead(EhciQueueHead* queueHead) {
+    void EHCIDriver::initAsyncList(QH** pQueueHead) {
         #define HEAD_RELCAMATION_LIST_FLAG 0x00008000
-        queueHead = getFreeQueueHead();
+        QH* queueHead = getFreeQueueHead();
         queueHead->qhlp = (uint64_t)(uint32_t*)queueHead | SET_QH_FLAG;
         queueHead->ch = HEAD_RELCAMATION_LIST_FLAG;
         queueHead->caps = 0;
         queueHead->curLink = 0;
-        queueHead->nextLink = SET_TERMINATE;
+        queueHead->nextLink = (uint32_t)queueHead;
         queueHead->altLink = 0;
         queueHead->token = 0;
         for (uint32_t i = 0; i < 5; ++i) {
             queueHead->buffer[i] = 0;
-            queueHead->extBuffer[i] = 0;
         }
-        queueHead->transfer = 0;
-        queueHead->qhLink.prev = &queueHead->qhLink;
-        queueHead->qhLink.next = &queueHead->qhLink;
+        
+        *pQueueHead = queueHead;
     }
 
-    void EHCIDriver::initPeriodicQueueHead(EhciQueueHead* queueHead) {
+    void EHCIDriver::initPeriodicList(QH** pQueueHead, uint32_t** pFrameListBase) {
         // periodic queue head
-        queueHead = getFreeQueueHead();
+        QH* queueHead = getFreeQueueHead();
         queueHead->qhlp = SET_TERMINATE;
         queueHead->ch = 0;
         queueHead->caps = 0;
@@ -162,11 +184,21 @@ namespace USB {
         queueHead->token = 0;
         for (uint8_t i = 0; i < 5; ++i) {
             queueHead->buffer[i] = 0;
-            queueHead->extBuffer[i] = 0;
         }
-        queueHead->transfer = 0;
-        queueHead->qhLink.prev = &queueHead->qhLink;
-        queueHead->qhLink.next = &queueHead->qhLink;
+
+        // TODO:: right now, it only allows for __1ms__ periodic transfers
+        // frame list
+        uint32_t* frameList = (uint32_t*) GlobalAllocator.RequestPage();
+        g_PageTableManager.MapMemory(frameList, frameList);
+        for (uint16_t i = 0; i < 1024; ++i)
+        {
+            frameList[i] = SET_QH_FLAG | (uint64_t)(uint32_t*)queueHead;
+        }
+        hc.opRegs->FrameIndex = 0;
+        hc.opRegs->PeriodicList = (uint64_t) hc.frameList;
+
+        *pQueueHead = queueHead;
+        *pFrameListBase = frameList;
     }
 
     void EHCIDriver::TransferToPort(uint32_t* portStsCtl) {
@@ -179,11 +211,16 @@ namespace USB {
         p.53 https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/ehci-specification-for-usb.pdf
     */
     EHCIDriver::EHCIDriver(PCI::PCIDeviceHeader* pciBaseAddress) {
+        // TODO:: explain or make sure that the address can be represented with only lower 32 bits
+        EHCIMemoryPage = (uint64_t) GlobalAllocator.RequestPage();
+        EHCIMemoryPageEnd = EHCIMemoryPage + 4096;
+        freeMemoryPointer = EHCIMemoryPage;
+
         // Initing init
         this->pciBaseAddress = pciBaseAddress;
         uint64_t baseAddress = ((PCI::PCIHeader0*)pciBaseAddress)->BAR0;
-        hc.capRegs = (EhciCapbilites*) baseAddress;
 
+        hc.capRegs = (EhciCapbilites*) baseAddress;
         g_PageTableManager.MapMemory(hc.capRegs, hc.capRegs);
         hc.opRegs = (EhciOperations*) (baseAddress + hc.capRegs->length);
         g_PageTableManager.MapMemory(hc.opRegs, hc.opRegs);
@@ -193,21 +230,13 @@ namespace USB {
         PRINT::Println(to_hstring((uint64_t) hc.opRegs));
         PRINT::Next();
 
-        hc.queueHeadPool = (EhciQueueHead*) malloc(sizeof(EhciQueueHead) * MAX_QH);
-        memset(hc.queueHeadPool, 0, sizeof(EhciQueueHead) * MAX_QH);
+        PRINT::Println(to_string(sizeof(QH)));
 
-        initAsyncQueueHead(hc.asyncQueueHead);
-        initPeriodicQueueHead(hc.periodicQueueHead);
-        hc.frameList = initFrameList(hc.opRegs);
-
+        initAsyncList(&hc.asyncQueueHead);
+        initPeriodicList(&hc.periodicQueueHead, &hc.frameList);
 
         // control data segment
         hc.opRegs->CtlDataSegement = 0; //TODO:: suppose to map to 4Gigabyte segment
-
-        // transfer descriptors
-        hc.transferDescriptorsPool = (EhciTransferDescriptor*) malloc(sizeof(EhciTransferDescriptor) * MAX_TD);
-        memset(hc.transferDescriptorsPool, 0, sizeof(EhciTransferDescriptor) * MAX_TD);
-
         hc.opRegs->UsbIntr = 1; // TODO:: Handle interrupts
 
         #define CMD_ITC_SHIFT 16 //Interrupt Threshold Control

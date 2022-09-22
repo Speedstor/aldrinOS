@@ -52,13 +52,16 @@ namespace USB {
         EhciCapbilites* capRegs;
         EhciOperations* opRegs;
         uint32_t *frameList;
-        EhciQueueHead* queueHeadPool;
-        EhciTransferDescriptor* transferDescriptorsPool;
-        EhciQueueHead* asyncQueueHead;
-        EhciQueueHead* periodicQueueHead;
+        QH* queueHeadPool;
+        qTD* transferDescriptorsPool;
+        QH* asyncQueueHead;
+        QH* periodicQueueHead;
     };
 
     class EHCIDriver {
+        #define DEFAULT_QH_COUNT 2
+        #define DEFAULT_qTD_COUNT 10
+
         public:
         EHCIDriver(PCI::PCIDeviceHeader* pciBaseAddress);
         ~EHCIDriver();
@@ -68,15 +71,26 @@ namespace USB {
         void HandlePortChange_Interrupt();
         void PortSuspend(uint32_t* portStsCtl);
         void PortResume(uint32_t* portStsCtl);
+        uint64_t EHCIMemoryPage; //should be 32byte aligned
+        uint64_t EHCIMemoryPageEnd; //should be 32byte aligned
+        uint64_t freeMemoryPointer;
 
         private:
-        EhciQueueHead* getFreeQueueHead();
-        void initAsyncQueueHead(EhciQueueHead* queueHead);
-        void initPeriodicQueueHead(EhciQueueHead* queueHead);
-        uint32_t* initFrameList(EhciOperations* opRegs);
+        QH* getFreeQueueHead();
+        qTD* getqTD();
+        void populateTransferDescriptor(
+            qTD** pTransferDescriptor, 
+            uint8_t dataToggle,
+            uint16_t length,
+            uint8_t ioc,
+            uint8_t countErr,
+            uint8_t PID,
+            uint8_t status,
+            void* data);
+        void initAsyncList(QH** pQueueHead);
+        void initPeriodicList(QH** pQueueHead, uint32_t** pFrameListBase);
         uint8_t PortChange(uint32_t* portStsCtl);
         void TransferToPort(uint32_t* portStsCtl);
-
 
 
 
