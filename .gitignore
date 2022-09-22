@@ -1,5 +1,4 @@
-
-
+OVMF_VARS-pure-efi.fd
 kernel/lib
 Jan Axelson*
 docs
