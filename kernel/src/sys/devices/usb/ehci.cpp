@@ -1,6 +1,7 @@
 
 
 #include "ehci.h"
+#include "EhciPacketDef.h"
 #include "../../../graphics/Print.h"
 #include "../../../inc/cstr.h"
 #include "../../memory/heap.h"
@@ -10,18 +11,29 @@
 #include "../../memory/paging/PageFrameAllocator.h"
 
 namespace USB {
-    void populateTransferDescriptor(
+    void EHCIDriver::populateTransferDescriptor(
         qTD** pTransferDescriptor, 
         uint8_t dataToggle,
         uint16_t length,
         uint8_t ioc,
         uint8_t countErr,
         uint8_t PID,
-        uint8_t status,
-        void* data
+        uint8_t status, //TODO:: expand?
+        void* pData
     ) {
         qTD* transferDescriptor = *pTransferDescriptor;
         
+        transferDescriptor->altLink = 0 | QTD_NEXT_TERMINATE;
+
+        uint32_t token = 0;
+        if (dataToggle) token |= QTD_TOKEN_DATA_TOGGLE;
+        if (ioc) token |= QTD_TOKEN_IOC;
+        token |= countErr << QTD_TOKEN_ERROR_COUNTER_SHIFT; //TODO truncate to one line
+        token |= length << QTD_TOKEN_LENGTH_SHIFT;
+        token |= PID << QTD_TOKEN_PID_SHIFT;
+        transferDescriptor->token = token;
+
+        transferDescriptor->pBuffer[0] = (uint32_t)(uint64_t) pData;
     }
 
 
@@ -100,19 +112,50 @@ namespace USB {
         #define REQ_SET_ADDR 0x06
 
         // create SETUP packet
-        qTD* transferDescriptor = getqTD();
+        qTD* setupDescriptor = getqTD();
+
+        //TODO:: check if &GET_DESCRIPTOR_DATA_BUFFER is aross a 4kbyte alignment
+        //GET_DESCRIPTOR request (SETUP packet)
         populateTransferDescriptor(
-            transferDescriptor,
-            dataToggle,
-            length,
-            ioc,
-            countErr,
-            PID,
-            status,
-            data
+            &setupDescriptor,
+            (uint8_t) 0,
+            (uint16_t) SETUP_PACKET_LENGTH,
+            (uint8_t) 0,
+            (uint8_t) QTD_ERR_COUNT,
+            (uint8_t) PID_SETUP,
+            (uint8_t) QTD_TOKEN_STATUS_ACTIVE,
+            (void*) &GET_DESCRIPTOR_DATA_BUFFER
         );
 
+        qTD* inDescriptor = getqTD();
+        uint32_t* recieveData = malloc(0x40);
+        populateTransferDescriptor(
+            &inDescriptor,
+            1,
+            0x40,
+            0,
+            QTD_ERR_COUNT,
+            PID_IN,
+            QTD_TOKEN_STATUS_ACTIVE,
+            recieveData
+        );
+        linkDescriptors(setupDescriptor, inDescriptor);
 
+        qTD* ackDescriptor = getqTD();
+        populateTransferDescriptor(
+            &ackDescriptor,
+            1,
+            EMPTY_LENGTH,
+            1,
+            QTD_ERR_COUNT,
+            PID_OUT,
+            QTD_TOKEN_STATUS_ACTIVE,
+            0
+        )
+
+
+        linkDescriptors(inDescriptor, ackDescriptor);
+        endLinkDescriptor(ackDescriptor);
 
 
         // link it to async packet
@@ -162,7 +205,7 @@ namespace USB {
         queueHead->ch = HEAD_RELCAMATION_LIST_FLAG;
         queueHead->caps = 0;
         queueHead->curLink = 0;
-        queueHead->nextLink = (uint32_t)queueHead;
+        queueHead->nextLink = (uint32_t)(uint64_t)queueHead;
         queueHead->altLink = 0;
         queueHead->token = 0;
         for (uint32_t i = 0; i < 5; ++i) {

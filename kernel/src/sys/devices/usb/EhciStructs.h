@@ -138,7 +138,7 @@ namespace USB {
         volatile uint32_t link;
         volatile uint32_t altLink;
         volatile uint32_t token;
-        volatile uint32_t buffer[5];
+        volatile uint32_t pBuffer[5];
         // --- 32 bytes
     } __attribute__((packed));
 

@@ -74,19 +74,11 @@ namespace USB {
         uint64_t EHCIMemoryPage; //should be 32byte aligned
         uint64_t EHCIMemoryPageEnd; //should be 32byte aligned
         uint64_t freeMemoryPointer;
+        void populateTransferDescriptor(qTD** pTransferDescriptor, uint8_t dataToggle, uint16_t length, uint8_t ioc, uint8_t countErr, uint8_t PID, uint8_t status, void* pData);
 
         private:
         QH* getFreeQueueHead();
         qTD* getqTD();
-        void populateTransferDescriptor(
-            qTD** pTransferDescriptor, 
-            uint8_t dataToggle,
-            uint16_t length,
-            uint8_t ioc,
-            uint8_t countErr,
-            uint8_t PID,
-            uint8_t status,
-            void* data);
         void initAsyncList(QH** pQueueHead);
         void initPeriodicList(QH** pQueueHead, uint32_t** pFrameListBase);
         uint8_t PortChange(uint32_t* portStsCtl);
