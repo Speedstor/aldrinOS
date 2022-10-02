@@ -23,19 +23,44 @@ namespace USB {
     ) {
         qTD* transferDescriptor = *pTransferDescriptor;
         
-        transferDescriptor->altLink = 0 | QTD_NEXT_TERMINATE;
+        transferDescriptor->altLink = QTD_NEXT_TERMINATE;
 
+        //TODO:: Optimize below
         uint32_t token = 0;
         if (dataToggle) token |= QTD_TOKEN_DATA_TOGGLE;
         if (ioc) token |= QTD_TOKEN_IOC;
         token |= countErr << QTD_TOKEN_ERROR_COUNTER_SHIFT; //TODO truncate to one line
         token |= length << QTD_TOKEN_LENGTH_SHIFT;
         token |= PID << QTD_TOKEN_PID_SHIFT;
+        token |= status;
         transferDescriptor->token = token;
 
         transferDescriptor->pBuffer[0] = (uint32_t)(uint64_t) pData;
+        transferDescriptor->pBuffer[1] = 0;
+        transferDescriptor->pBuffer[2] = 0;
+        transferDescriptor->pBuffer[3] = 0;
+        transferDescriptor->pBuffer[4] = 0;
     }
 
+    // For debug, let it return -1 when the address is not 32bit aligned
+    int8_t EHCIDriver::linkDescriptors(qTD* fromTD, qTD* toTD) {
+        uint64_t toAddr = (uint64_t) toTD;
+        if (toAddr & (UPPER_64_MASK | LEAST_5_BIT_MASK)) {
+            PRINT::Next();
+            PRINT::Print(to_hstring((uint64_t) (UPPER_64_MASK | LEAST_5_BIT_MASK)));
+            PRINT::Print(" toTD addr is: ");
+            PRINT::Print(to_hstring(toAddr));
+            PRINT::Print(" | ");
+            PRINT::Println("linking qTD failed");
+            return -1;
+        }
+        fromTD->link = (uint32_t) toAddr;
+        return 0;
+    }
+
+    void EHCIDriver::endLinkDescriptor(qTD* endTD) {
+        endTD->link = QTD_NEXT_TERMINATE;
+    }
 
     //TODO:: figuring out if deallocating queue heads are possible, and to implement it if so
     QH* EHCIDriver::getFreeQueueHead() {
@@ -46,6 +71,65 @@ namespace USB {
         }
         return 0;
     }
+
+    int EHCIDriver::waitResponseQH(QH* qh) {
+        int err = 1; // TODO:: define err consts
+
+        if (!(hc.opRegs->UsbSts & USBSTS_ASYNCHRONOUS_SCHEDULE_STATUS)) {
+            err = 10;
+        }
+        for (int8_t t = 0; t < 100; t++) { 
+            if (qh->token & QTD_TOKEN_STATUS_HALTED) {
+                PRINT::Println("ERROR: waiting for async halted");
+                err = 2;
+                break;
+            }
+            if ((qh->nextLink & QTD_NEXT_TERMINATE) && !(qh->token & QTD_TOKEN_STATUS_ACTIVE)) {
+                if (qh->token & GET_DESCRIPTOR_DATA_BUFFER) {
+                    PRINT::Println(" Data Buffer Error\n");
+                    err = 3;
+                }
+                if (qh->token & QTD_TOKEN_STATUS_BABBLE_DETECTED) {
+                    PRINT::Println(" Babble Detected\n");
+                    err = 4;
+                }
+                if (qh->token & QTD_TOKEN_STATUS_TRANSACTION_ERROR) {
+                    PRINT::Println(" Transaction Error\n");
+                    err = 5;
+                }
+                if (qh->token & QTD_TOKEN_STATUS_MISSED_MFRAME) {
+                    PRINT::Println(" Missed Micro-Frame\n");
+                    err = 6;
+                }
+
+                err = 0;
+                break;
+            }
+
+            PIT::Sleep(3);
+        }
+
+        //TODO:: free qTDs     :)
+
+        if (err != 0) {
+            PRINT::Next();
+            PRINT::Print("token: ");
+            PRINT::Print(to_hstring(qh->token));
+            PRINT::Print(" | nextLink: ");
+            PRINT::Print(to_hstring(qh->nextLink));
+            PRINT::Print(" | hc.opRegs->UsbSts: ");
+            PRINT::Print(to_hstring(hc.opRegs->UsbSts));
+            PRINT::Next();
+            PRINT::Println("ERROR:: waiting for async response timeout");
+        }
+        return err;
+    }
+    
+    // TODO:: 
+    void EHCIDriver::insertAsyncQH(QH* headQH, QH* newQH) {
+        
+    }
+    
 
     qTD* EHCIDriver::getqTD() {
         qTD* avaliableqTD = (qTD*) freeMemoryPointer;
@@ -108,14 +192,11 @@ namespace USB {
         PRINT::Print(to_hstring(*portStsCtl));
         PRINT::Print("  |  ");
 
-        // Request GET DEVICE DESCRIPTOR
-        #define REQ_SET_ADDR 0x06
-
-        // create SETUP packet
+        // GET_DESCRIPTOR request (SETUP packet)
         qTD* setupDescriptor = getqTD();
-
+        PRINT::Next();
+        PRINT::Println(to_hstring(GET_DESCRIPTOR_DATA_BUFFER));
         //TODO:: check if &GET_DESCRIPTOR_DATA_BUFFER is aross a 4kbyte alignment
-        //GET_DESCRIPTOR request (SETUP packet)
         populateTransferDescriptor(
             &setupDescriptor,
             (uint8_t) 0,
@@ -126,9 +207,13 @@ namespace USB {
             (uint8_t) QTD_TOKEN_STATUS_ACTIVE,
             (void*) &GET_DESCRIPTOR_DATA_BUFFER
         );
+        PRINT::Print("setupDescriptor Token: ");
+        PRINT::Print(to_hstring(setupDescriptor->token));
+        PRINT::Print("  |  ");
 
+        // IN packet
         qTD* inDescriptor = getqTD();
-        uint32_t* recieveData = malloc(0x40);
+        uint32_t* recieveData = (uint32_t*) malloc(0x40);
         populateTransferDescriptor(
             &inDescriptor,
             1,
@@ -140,7 +225,11 @@ namespace USB {
             recieveData
         );
         linkDescriptors(setupDescriptor, inDescriptor);
+        PRINT::Print("inDescriptor Token: ");
+        PRINT::Print(to_hstring(inDescriptor->token));
+        PRINT::Print("  |  ");
 
+        // ACK packet
         qTD* ackDescriptor = getqTD();
         populateTransferDescriptor(
             &ackDescriptor,
@@ -151,17 +240,55 @@ namespace USB {
             PID_OUT,
             QTD_TOKEN_STATUS_ACTIVE,
             0
-        )
-
-
+        );
         linkDescriptors(inDescriptor, ackDescriptor);
         endLinkDescriptor(ackDescriptor);
+        PRINT::Print("ackDescriptor Token: ");
+        PRINT::Print(to_hstring(ackDescriptor->token));
+        PRINT::Print("  |  ");
 
+        PRINT::Next();
+        PRINT::Print("setup packet addr: ");
+        PRINT::Print(to_hstring((uint64_t) setupDescriptor));
+
+        PRINT::Next();
+        PRINT::Print("receive IN Data: ");
+        PRINT::Print(to_hstring(*recieveData));
+        PRINT::Print(" ");
+        PRINT::Print(to_hstring(*(recieveData + 1)));
+
+        QH* endpointZeroQH;
+        initAsyncList(&endpointZeroQH);
+
+        PRINT::Next();
+        PRINT::Print("link addr before: ");
+        PRINT::Print(to_hstring((uint64_t) endpointZeroQH->nextLink));
 
         // link it to async packet
-        
+        linkDescriptors((qTD*) &endpointZeroQH->nextLink, setupDescriptor);
+
+        PRINT::Next();
+        PRINT::Print("link addr after: ");
+        PRINT::Print(to_hstring((uint64_t) endpointZeroQH->nextLink));
+
+        // add it the async list
+        endpointZeroQH->qhlp = ((uint32_t)(uint64_t) hc.asyncQueueHead) | QH_TYP_QH;
+        hc.asyncQueueHead->qhlp = ((uint32_t)(uint64_t) endpointZeroQH) | QH_TYP_QH;
 
         // store device descriptor
+        int err = waitResponseQH(endpointZeroQH);
+
+        PRINT::Next();
+        PRINT::Print("receive IN Data: (");
+        PRINT::Print(to_string((uint64_t) err));
+        PRINT::Print(") ");
+        PRINT::Print(to_hstring(*recieveData));
+        PRINT::Print(" ");
+        PRINT::Print(to_hstring(*(recieveData + 1)));
+
+
+        // remove endpointZeroQH
+
 
         return 1;
     }
@@ -196,16 +323,14 @@ namespace USB {
     }
 
 
-    #define SET_TERMINATE (1 << 0)
-    #define SET_QH_FLAG (1 << 1)
     void EHCIDriver::initAsyncList(QH** pQueueHead) {
         #define HEAD_RELCAMATION_LIST_FLAG 0x00008000
         QH* queueHead = getFreeQueueHead();
-        queueHead->qhlp = (uint64_t)(uint32_t*)queueHead | SET_QH_FLAG;
-        queueHead->ch = HEAD_RELCAMATION_LIST_FLAG;
-        queueHead->caps = 0;
+        queueHead->qhlp = (uint64_t)(uint32_t*)queueHead | (QH_TYP_QH << QH_TYP_SHIFT);
+        queueHead->ch = ((DEFAULT_MAX_PACKET_LENGTH << QH_MAX_PACKET_LENGHT_SHIFT) | QH_HEAD_RECLAMATION_FLAG | QH_DATA_TOGGLE_CONTROL | QH_EPS_HIGH_SPEED);
+        queueHead->caps = 0x40000000; //TODO:: make more rigorously defined
         queueHead->curLink = 0;
-        queueHead->nextLink = (uint32_t)(uint64_t)queueHead;
+        queueHead->nextLink = QTD_NEXT_TERMINATE;
         queueHead->altLink = 0;
         queueHead->token = 0;
         for (uint32_t i = 0; i < 5; ++i) {
@@ -218,11 +343,11 @@ namespace USB {
     void EHCIDriver::initPeriodicList(QH** pQueueHead, uint32_t** pFrameListBase) {
         // periodic queue head
         QH* queueHead = getFreeQueueHead();
-        queueHead->qhlp = SET_TERMINATE;
+        queueHead->qhlp = QTD_NEXT_TERMINATE;
         queueHead->ch = 0;
         queueHead->caps = 0;
         queueHead->curLink = 0;
-        queueHead->nextLink = SET_TERMINATE;
+        queueHead->nextLink = QTD_NEXT_TERMINATE;
         queueHead->altLink = 0;
         queueHead->token = 0;
         for (uint8_t i = 0; i < 5; ++i) {
@@ -235,7 +360,7 @@ namespace USB {
         g_PageTableManager.MapMemory(frameList, frameList);
         for (uint16_t i = 0; i < 1024; ++i)
         {
-            frameList[i] = SET_QH_FLAG | (uint64_t)(uint32_t*)queueHead;
+            frameList[i] = (QH_TYP_QH << QH_TYP_SHIFT) | (uint64_t)(uint32_t*)queueHead;
         }
         hc.opRegs->FrameIndex = 0;
         hc.opRegs->PeriodicList = (uint64_t) hc.frameList;

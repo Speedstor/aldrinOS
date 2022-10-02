@@ -11,5 +11,9 @@ qemu-system-x86_64 -machine q35 ^
 -drive if=pflash,format=raw,unit=0,file=%OVMFDIR%/OVMF_CODE-pure-efi.fd,readonly=on ^
 -drive if=pflash,format=raw,unit=1,file=%OVMFDIR%/OVMF_VARS-pure-efi.fd -net none ^
 -device usb-ehci,id=ehci                                    ^
--device usb-mouse,bus=ehci.0                            
+-device usb-mouse,bus=ehci.0          
 pause
+
+@REM -drive if=none,id=stick,format=raw,file=/path/to/file.img \
+@REM -device nec-usb-xhci,id=xhci                              \
+@REM -device usb-storage,bus=xhci.0,drive=stick                  

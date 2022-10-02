@@ -30,6 +30,8 @@ kernel: $(OBJS) link
 
 sure: kernel buildimg run
 
+build: kernel buildimg
+
 go: buildimg run
 
 $(OBJDIR)/sys/interrupts/interrupts.o: $(SRCDIR)/sys/interrupts/interrupts.cpp

@@ -4,6 +4,10 @@
 #include <stdint.h>
 
 namespace USB {
+    // general help defs
+    #define UPPER_64_MASK 0xFFFFFFFF00000000
+    #define LEAST_5_BIT_MASK (0b11111)
+
     // Ehci --------
     struct EhciStructuralParams {
         uint8_t NumPorts:4;
@@ -158,6 +162,21 @@ namespace USB {
     #define QTD_TOKEN_STATUS_MISSED_MFRAME (1 << 2)
     #define QTD_TOKEN_STATUS_SPLIT_TRANSACTION_STATUS (1 << 1)
     #define QTD_TOKEN_STATUS_PING (1 << 0)
+
+    #define QH_TYP_ITD  0b00 // isochronous transfer descriptor
+    #define QH_TYP_QH   0b01 // queue head
+    #define QH_TYP_SITD 0b10 // split transaction isochronous transfer descriptor
+    #define QH_TYP_FSTN 0b11 // Frame Span Traversal Node
+    #define QH_TYP_SHIFT 1
+
+    #define QH_MAX_PACKET_LENGHT_SHIFT 16
+    #define QH_HEAD_RECLAMATION_FLAG (1 << 15)
+    #define QH_DATA_TOGGLE_CONTROL (1 << 14)
+    #define QH_EPS_FULL_SPEED (0b00 << 12)
+    #define QH_EPS_LOW_SPEED  (0b01 << 12)
+    #define QH_EPS_HIGH_SPEED (0b10 << 12)
+    #define QH_ENDPOINT_NUMBER_SHIFT 8
+    #define QH_INACTIVE_ON_NEXT_TRANS (1 << 7)
 
     // mindshare whitepaper p.16
     struct EhciCapbilites {

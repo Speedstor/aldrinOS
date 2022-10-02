@@ -65,16 +65,16 @@ namespace USB {
         public:
         EHCIDriver(PCI::PCIDeviceHeader* pciBaseAddress);
         ~EHCIDriver();
-        PCI::PCIDeviceHeader* pciBaseAddress;
-        EhciController hc;
         void enumeratePorts();
         void HandlePortChange_Interrupt();
         void PortSuspend(uint32_t* portStsCtl);
         void PortResume(uint32_t* portStsCtl);
+
+        PCI::PCIDeviceHeader* pciBaseAddress;
+        EhciController hc;
         uint64_t EHCIMemoryPage; //should be 32byte aligned
         uint64_t EHCIMemoryPageEnd; //should be 32byte aligned
         uint64_t freeMemoryPointer;
-        void populateTransferDescriptor(qTD** pTransferDescriptor, uint8_t dataToggle, uint16_t length, uint8_t ioc, uint8_t countErr, uint8_t PID, uint8_t status, void* pData);
 
         private:
         QH* getFreeQueueHead();
@@ -83,7 +83,11 @@ namespace USB {
         void initPeriodicList(QH** pQueueHead, uint32_t** pFrameListBase);
         uint8_t PortChange(uint32_t* portStsCtl);
         void TransferToPort(uint32_t* portStsCtl);
-
+        void populateTransferDescriptor(qTD** pTransferDescriptor, uint8_t dataToggle, uint16_t length, uint8_t ioc, uint8_t countErr, uint8_t PID, uint8_t status, void* pData);
+        int8_t linkDescriptors(qTD* fromTD, qTD* toTD);
+        void endLinkDescriptor(qTD* endTD);
+        int waitResponseQH(QH* qh);
+        void insertAsyncQH(QH* headQH, QH* newQH);
 
 
         #if 0 // NOTES
